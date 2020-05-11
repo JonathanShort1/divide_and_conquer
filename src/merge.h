@@ -9,8 +9,8 @@
 
 auto mergeDivide = [](const problem_t& p, std::vector<problem_t>& subps){
 	auto mid = p.left + (p.right - p.left) / 2;
-	Problem a = {p.left, mid};
-	Problem b = {mid, p.right};
+	problem_t a = {p.left, mid};
+	problem_t b = {mid, p.right};
 	subps.push_back(a);
 	subps.push_back(b);
 };

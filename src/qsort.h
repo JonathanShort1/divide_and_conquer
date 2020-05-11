@@ -21,8 +21,8 @@ auto qsortDivide = [](const problem_t& p, std::vector<problem_t>& subps){
 	std::swap(*(i + 1), *p.right);
 	partition = i + 1;
 
-	Problem a = {p.left, partition - 1};
-	Problem b = {partition + 1, p.right};
+	problem_t a = {p.left, partition - 1};
+	problem_t b = {partition + 1, p.right};
 	subps.push_back(a);
 	subps.push_back(b);
 };

@@ -7,8 +7,8 @@ all: main
 #						MAIN DRIVER
 ################################################################################
 
-main: main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h
-	$(CC) $(FLAGS) -o main main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h
+main: main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
+	$(CC) $(FLAGS) -o main main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
 
 ################################################################################
 #						CLEAN

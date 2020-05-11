@@ -12,12 +12,12 @@ using namespace std;
 
 int main(){
 
-	// DAC<int, int> dac(fibDivide, fibCombine, fibBase, fibThreshold, 15);
+	DAC<int, int> dac(fibDivide, fibCombine, fibBase, fibThreshold, 10);
 
-	vector<int> v(100);
-	iota(begin(v), end(v), 0);
-	shuffle(begin(v), end(v), mt19937(random_device{}()));
-	problem_t p {begin(v), end(v)};
+	// vector<int> v(100);
+	// iota(begin(v), end(v), 0);
+	// shuffle(begin(v), end(v), mt19937(random_device{}()));
+	// problem_t p {begin(v), end(v)};
 	
 	// DAC<problem_t, result_t> dac(
 	// 	mergeDivide,
@@ -27,15 +27,15 @@ int main(){
 	// 	p
 	// );
 
-	p.right -= 1;
-	DAC<problem_t, result_t> dac(
-		qsortDivide,
-		qsortCombine,
-		qsortBase,
-		qsortThreshold,
-		p
-	);
+	// p.right -= 1;
+	// DAC<problem_t, result_t> dac(
+	// 	qsortDivide,
+	// 	qsortCombine,
+	// 	qsortBase,
+	// 	qsortThreshold,
+	// 	p
+	// );
 
 	dac.compute();
-	cout << dac.getResult() << endl;
+	cout << "result: " << dac.getResult() << endl;
 }

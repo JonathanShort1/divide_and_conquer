@@ -1,34 +1,35 @@
+#include <memory>
+#include <iostream>
+
 #include "dac.h"
 #include "problem.h"
 
 template <typename ProblemType, typename ResultType>
 void DAC<ProblemType, ResultType>::compute()
 {
-	solve(problem, result);
-}
+	// set up new threads per worker
+	// crate worker class
 
-template <typename ProblemType, typename ResultType>
-void DAC<ProblemType, ResultType>::solve(const ProblemType& p, ResultType& r) {
+	/**
+	 * worker pulls from queue
+	 * if task children have not complete put to back
+	 * if task children have all comlete combine and remove
+	 * save result in parent
+	 */
 
-	if (threshold(p)) {
-		base(p, r);
-		return;
-	}
+	std::shared_ptr<Task<ProblemType, ResultType>> p(nullptr); // dummy parent
+	auto t = std::make_shared<Task<ProblemType, ResultType>>(problem, p, 0, true);
+	worker.workQueuePush(t);
 
-	std::vector<ProblemType> ps;
-	divide(p, ps);
+	std::thread w1 = std::thread([&] {worker.work(); } );
+	w1.join();
 
-	std::vector<ResultType> rs(ps.size());
-	std::vector<std::thread> ts(ps.size());
-	for(size_t i = 0; i < ps.size(); ++i) {
-		ts[i] = std::thread( [&, i] { solve(ps[i], rs[i]); } );
-	}
+	std::cout << t->problem << std::endl;
 
-	for(size_t i = 0; i < ps.size(); ++i) {
-		ts[i].join();
-	}
 
-	combine(rs, r);
+	//signal threads to exit
+
+	result = t->getResult();
 }
 
 template void DAC<int, int>::compute();

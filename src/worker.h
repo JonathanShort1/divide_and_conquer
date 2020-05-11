@@ -1,18 +1,21 @@
-#ifndef DAC_H
-#define DAC_H
+#ifndef WORKER_H
+#define WORKER_H
 
-#include <vector>
+#include <iostream>
+#include <memory>
+#include <mutex>
 #include <functional>
-#include <thread>
+#include <queue>
 
 #include "task.h"
-#include "worker.h"
 
 template <typename ProblemType, typename ResultType>
-class DAC {
+class Worker {
 	private:
+		std::queue<std::shared_ptr<Task<ProblemType, ResultType>>> q;
+		std::mutex m;
 
-	public:
+		bool isComplete;
 
 		// TYPE ALIASES
 		typedef std::function<void(const ProblemType& , std::vector<ProblemType>&)> divide_f_t;
@@ -26,29 +29,25 @@ class DAC {
 		base_f_t base;
 		threshold_f_t threshold;
 
-		const ProblemType& problem;
-		ResultType result;
-
-		int numCores;
-		Worker<ProblemType, ResultType> worker;
-
-		DAC(const divide_f_t& d,
+		void solveTask(std::shared_ptr<Task<ProblemType, ResultType>> t);
+	
+	public:
+		Worker(
+			const divide_f_t& d,
 			const combine_f_t& c,
 			const base_f_t& b,
-			const threshold_f_t& t,
-			const ProblemType& p)
+			const threshold_f_t& t
+			)
 			: divide(d)
 			, combine(c)
 			, base(b)
 			, threshold(t)
-			, problem(p)
-			, numCores(std::thread::hardware_concurrency())
-			, worker(divide, combine, base, threshold)
 			{}
 
-		const ResultType& getResult() { return result; }
+		void work();
 
-		void compute();
+		void workQueuePush(std::shared_ptr<Task<ProblemType, ResultType>> t);
+		std::shared_ptr<Task<ProblemType, ResultType>> workQueuePop();
 };
 
 #endif
