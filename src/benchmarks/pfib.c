@@ -8,7 +8,7 @@ unsigned int Fib( unsigned int n ) {
 
 int main() {
    // you will need to modify all parameters, etc.
-   int n = 10;
+   int n = 50;
    int i;
 	
    printf("Fibbonacci of %d: " , n);

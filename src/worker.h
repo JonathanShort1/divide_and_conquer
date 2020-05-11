@@ -1,10 +1,9 @@
 #ifndef WORKER_H
 #define WORKER_H
 
-#include <iostream>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <functional>
 #include <queue>
 
 #include "task.h"
@@ -12,10 +11,12 @@
 template <typename ProblemType, typename ResultType>
 class Worker {
 	private:
-		std::queue<std::shared_ptr<Task<ProblemType, ResultType>>> q;
-		std::mutex m;
-
 		bool isComplete;
+		int id;
+		std::vector<std::shared_ptr<Worker<ProblemType, ResultType>>> workers;
+		std::queue<std::shared_ptr<Task<ProblemType, ResultType>>> q;
+		std::mutex *m;
+		
 
 		// TYPE ALIASES
 		typedef std::function<void(const ProblemType& , std::vector<ProblemType>&)> divide_f_t;
@@ -33,12 +34,16 @@ class Worker {
 	
 	public:
 		Worker(
+			int id,
 			const divide_f_t& d,
 			const combine_f_t& c,
 			const base_f_t& b,
 			const threshold_f_t& t
 			)
-			: divide(d)
+			: isComplete(false)
+			, id(id)
+			, m(new std::mutex())
+			, divide(d)
 			, combine(c)
 			, base(b)
 			, threshold(t)
@@ -46,7 +51,14 @@ class Worker {
 
 		void work();
 
-		void workQueuePush(std::shared_ptr<Task<ProblemType, ResultType>> t);
+		void setWorkerVector(std::vector<std::shared_ptr<Worker<ProblemType, ResultType>>> ws)
+		{
+			workers = ws;
+		}
+
+		std::vector<std::shared_ptr<Worker<ProblemType, ResultType>>> getWorkers() { return workers; }
+
+		void workQueuePush(const std::shared_ptr<Task<ProblemType, ResultType>>& t);
 		std::shared_ptr<Task<ProblemType, ResultType>> workQueuePop();
 };
 

@@ -1,9 +1,9 @@
 #ifndef DAC_H
 #define DAC_H
 
+#include <memory>
 #include <vector>
 #include <functional>
-#include <thread>
 
 #include "task.h"
 #include "worker.h"
@@ -26,29 +26,23 @@ class DAC {
 		base_f_t base;
 		threshold_f_t threshold;
 
-		const ProblemType& problem;
+		const ProblemType problem;
 		ResultType result;
 
 		int numCores;
-		Worker<ProblemType, ResultType> worker;
+		std::vector<std::shared_ptr<Worker<ProblemType, ResultType>>> workers;
 
 		DAC(const divide_f_t& d,
 			const combine_f_t& c,
 			const base_f_t& b,
 			const threshold_f_t& t,
-			const ProblemType& p)
-			: divide(d)
-			, combine(c)
-			, base(b)
-			, threshold(t)
-			, problem(p)
-			, numCores(std::thread::hardware_concurrency())
-			, worker(divide, combine, base, threshold)
-			{}
+			const ProblemType& p);
 
 		const ResultType& getResult() { return result; }
 
 		void compute();
+
+		void pushToVector(const int i);
 };
 
 #endif

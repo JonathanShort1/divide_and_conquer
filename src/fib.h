@@ -24,7 +24,7 @@ auto fibBase = [](const int& p, int& res){
 };
 
 auto fibThreshold = [](const int& t){
-	return t < 6;
+	return t < 30;
 };
 
 #endif

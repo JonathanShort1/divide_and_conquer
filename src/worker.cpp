@@ -1,26 +1,27 @@
 #include "worker.h"
 #include "problem.h"
 
+#include <algorithm>
 #include <iostream>
+#include <iterator>
+#include <random>
 
 template <typename ProblemType, typename ResultType>
-void Worker<ProblemType, ResultType>::workQueuePush(std::shared_ptr<Task<ProblemType, ResultType>> t) {
-	std::lock_guard<std::mutex> lock(m);
-
-	std::cout << "push " << t->problem << std::endl;
+void Worker<ProblemType, ResultType>::workQueuePush(
+						const std::shared_ptr<Task<ProblemType, ResultType>>& t) {
+	std::lock_guard<std::mutex> lock(*m);
 	q.push(t);
 }
 
 template <typename ProblemType, typename ResultType>
-std::shared_ptr<Task<ProblemType, ResultType>> Worker<ProblemType, ResultType>::workQueuePop() {
-	std::lock_guard<std::mutex> lock(m);
+std::shared_ptr<Task<ProblemType, ResultType>> 
+								Worker<ProblemType, ResultType>::workQueuePop() {
+	std::lock_guard<std::mutex> lock(*m);
 	if (q.empty()) {
 		return nullptr;
 	}
 
 	auto t = q.front();
-	std::cout << "pop " << t->problem << t.use_count() << std::endl;
-
 	q.pop();
 	return t;
 }
@@ -28,16 +29,62 @@ std::shared_ptr<Task<ProblemType, ResultType>> Worker<ProblemType, ResultType>::
 template <typename ProblemType, typename ResultType>
 void Worker<ProblemType, ResultType>::work()
 {
-	while (!q.empty()) {
-		std::shared_ptr<Task<ProblemType, ResultType>> t = workQueuePop();
+	std::vector<int> v(workers.size());
+	std::iota(begin(v), end(v), 0); // generate numbers 0 to n - 1
+	std::random_device rd;
+	std::mt19937 g(rd());
 
-		if (!t) {
-			std::cout << "stolen" << std::endl;
+	while(!isComplete) {
+		// If any other worker has complete then so have we
+		auto anyComplete = std::any_of(
+					begin(workers),
+					end(workers),
+					[](std::shared_ptr<Worker<ProblemType, ResultType>> w){ return w->isComplete; }
+				);
+
+		if (anyComplete) {
+			isComplete = true;
+			break;
 		}
 
-		std::cout << "solve task " << t->problem << " " << t->isWaiting << " " << t->isComplete << std::endl;
+		// While tasks in own queue
+		while (!q.empty()) {
+			auto t = workQueuePop();
 
-		solveTask(t);
+			if (t) { // if fails then task was stolen
+				if (t->isRoot && t->isComplete) {
+					isComplete = true;
+				} else {
+					solveTask(t);
+				}
+			}
+		}
+
+		// Attempt to steal from another queue
+		std::shuffle(begin(v), end(v), g); // shuffle indexes randomly
+
+		for (auto it = begin(v); it != end(v); ++it) {
+			auto w = workers[*it]; // access random worker
+			if (w->id != id) {// not self
+
+				if (w->isComplete) { // a worker has complete so we should as well
+					isComplete = true;
+					break;
+				}
+				auto t = w->workQueuePop();
+
+				if (t) {
+					if (t->isRoot && t->isComplete) {
+						isComplete = true;
+					} else {
+						std::cout << "Successful steal" << std::endl;
+						solveTask(t);
+					}
+					break; // should now have some tasks on own queue or worker complete
+				}
+			}
+		}
+		// Completed all own tasks, tried to steal a task, now test for completion and repeat
 	}
 }
 
@@ -62,6 +109,8 @@ void Worker<ProblemType, ResultType>::solveTask(std::shared_ptr<Task<ProblemType
 		if (!task->isRoot) {
 			task->parent->childCompleteCount++;
 			task->parent->results[task->index] = task->result;
+		} else {
+			workQueuePush(task); // push root task back to queue to signify end of computation
 		}
 		return;
 	}
@@ -77,6 +126,8 @@ void Worker<ProblemType, ResultType>::solveTask(std::shared_ptr<Task<ProblemType
 		if (!task->isRoot) {
 			task->parent->childCompleteCount++;
 			task->parent->results[task->index] = task->result;
+		} else {
+			workQueuePush(task); // push root task back to queue to signify end of computation
 		}
 		return;
 	}
@@ -90,20 +141,14 @@ void Worker<ProblemType, ResultType>::solveTask(std::shared_ptr<Task<ProblemType
 	task->results = std::vector<ResultType>(ps.size());
 	
 	for (size_t i = 0; i < ps.size(); ++i) {
-		// std::shared_ptr<Task<ProblemType, ResultType>> t =
-			// std::shared_ptr<Task<ProblemType, ResultType>>(new Task<ProblemType, ResultType>(ps[i], task, i, false));
 		workQueuePush(
 			std::make_shared<Task<ProblemType, ResultType>>(ps[i], task, i, false)
 		);
 	}
 
-	auto t = workQueuePop();
-	std::cout << "solve task " << t->problem << " " << t->isWaiting << " " << t->isComplete << std::endl;
-	workQueuePush(t);
-
 	// Child tasks created, now add back to queue and wait for completion
 	task->isWaiting = true;
-	// workQueuePush(task);
+	workQueuePush(task);
 }
 
 template void Worker<int, int>::work();
