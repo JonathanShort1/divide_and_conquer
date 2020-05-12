@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <numeric>
 #include <random>
@@ -18,7 +19,9 @@ int main(){
 	// 				fibThreshold,
 	// 				40);
 
-	vector<int> v(100000);
+	// vector problem for merge sort and qsort
+	unsigned int n = 2000000;
+	vector<int> v(n);
 	iota(begin(v), end(v), 0);
 	shuffle(begin(v), end(v), mt19937(random_device{}()));
 	problem_t p {begin(v), end(v)};
@@ -40,6 +43,16 @@ int main(){
 	// 	p
 	// );
 
+
+	auto start = chrono::high_resolution_clock::now();
+
 	dac.compute();
-	cout << "result: " << dac.getResult() << endl;
+
+	auto end = chrono::high_resolution_clock::now();
+	auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+
+	// cout << "result: " << dac.getResult() << endl;
+	cout << "duration: " << duration << endl;
+
+	return 0;
 }

@@ -1,5 +1,4 @@
-CPPC=g++
-CC = gcc
+CC=g++
 FLAGS= -Wall -Wextra -pthread -g
 
 all: main pfib qsort mergesort
@@ -9,20 +8,20 @@ all: main pfib qsort mergesort
 ################################################################################
 
 main: main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
-	$(CPPC) $(FLAGS) -o main main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
+	$(CC) $(FLAGS) -o main main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
 
-pfib: benchmarks/pfib.c
-	$(CC) $(FLAGS) -o benchmarks/pfib benchmarks/pfib.c
+pfib: benchmarks/pfib.cpp
+	$(CC) $(FLAGS) -o benchmarks/pfib benchmarks/pfib.cpp
 
-qsort: benchmarks/qsort.c
-	$(CC) $(FLAGS) -o benchmarks/qsort benchmarks/qsort.c
+qsort: benchmarks/qsort.cpp
+	$(CC) $(FLAGS) -o benchmarks/qsort benchmarks/qsort.cpp
 
-mergesort: benchmarks/mergesort.c
-	$(CC) $(FLAGS) -o benchmarks/mergesort benchmarks/mergesort.c
+mergesort: benchmarks/mergesort.cpp
+	$(CC) $(FLAGS) -o benchmarks/mergesort benchmarks/mergesort.cpp
 
 ################################################################################
 #						CLEAN
 ################################################################################
 
 clean: 
-	rm -rf *.o main pfib qsort mergesort
+	rm -rf *.o main benchmarks/pfib benchmarks/qsort benchmarks/mergesort

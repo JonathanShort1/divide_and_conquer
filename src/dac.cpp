@@ -15,58 +15,43 @@ DAC<ProblemType, ResultType>::DAC(const divide_f_t& d,
 , combine(c)
 , base(b)
 , threshold(t)
-, problem(p)
-, numCores(std::thread::hardware_concurrency())
+, d_problem(p)
+, d_numCores(std::thread::hardware_concurrency())
 {}
 
 template <typename ProblemType, typename ResultType>
 void DAC<ProblemType, ResultType>::compute()
 {
-	/**
-	 * worker pulls from queue
-	 * if task children have not complete put to back
-	 * if task children have all comlete combine and remove
-	 * save result in parent
-	 */
-
 	// Create workers
-	for (int i = 0; i < numCores; ++i) {
-		workers.push_back(
-			std::make_shared<Worker<ProblemType, ResultType>>(i, divide, combine, base, threshold)
-		);
+	for (int i = 0; i < d_numCores; ++i) {
+		d_workers.push_back(std::make_shared<Worker<ProblemType, ResultType>>(i, divide, combine, base, threshold));
 	}
 
-	// build vector of workers for each worker
-	for (int i = 0; i < numCores; ++i) {
-		workers[i]->setWorkerVector(workers);
+	// set vector of workers for each worker
+	for (int i = 0; i < d_numCores; ++i) {
+		d_workers[i]->setWorkerVector(d_workers);
 	}
 
 	// Create root task
 	std::shared_ptr<Task<ProblemType, ResultType>> p(nullptr); // dummy parent
-	auto t = std::make_shared<Task<ProblemType, ResultType>>(problem, p, 0, true);
+	auto task = std::make_shared<Task<ProblemType, ResultType>>(d_problem, p, 0, true);
 	
 	// Push root task to first worker
-	workers[0]->workQueuePush(t);
+	d_workers[0]->workQueuePush(task);
 
 	// Set all worker running
 	std::vector<std::thread> threads;
-	for (int i = 0; i < numCores; ++i) {
-		threads.push_back(std::thread([this, i] { workers[i]->work(); }));
+	for (int i = 0; i < d_numCores; ++i) {
+		threads.push_back(std::thread([this, i] { d_workers[i]->work(); }));
 	}
 
 	// wait for all workers to complete
-	for (int i = 0; i < numCores; ++i) {
+	for (int i = 0; i < d_numCores; ++i) {
 		threads[i].join();
 	}
 
 	// get result from root task
-	result = t->getResult();
-}
-
-template <typename ProblemType, typename ResultType>
-void DAC<ProblemType, ResultType>::pushToVector(const int index)
-{
-	
+	d_result = task->getResult();
 }
 
 // Types to allow

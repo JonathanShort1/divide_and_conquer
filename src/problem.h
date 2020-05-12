@@ -1,3 +1,12 @@
+/**
+ * This header defines the problem and result type for the merge sort and qsort
+ * problems.  They both require a reference to the beginning of the sub problem
+ * and the end of the sub problem.  This is represented by a vector iterator.
+ * 
+ * The '<<' operator is also overloaded to allow for easier printing.  This is
+ * not used for any computation.
+ */
+
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
