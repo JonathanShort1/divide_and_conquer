@@ -52,18 +52,19 @@ void quickSort(vector<int>& arr, int low, int high)
 int main() 
 { 
 	int n = 1000000;
-	vector<int> v(n);
-	iota(begin(v), end(v), 0);
-	shuffle(begin(v), end(v), mt19937(random_device{}()));
-
-	auto start = chrono::high_resolution_clock::now();
-
-	quickSort(v, 0, n-1);
-
-	auto end = chrono::high_resolution_clock::now();
-	auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
 	
-	cout << "duration: " << duration << endl;
+	for (int i = 10000; i < n; i += 10000) {
+		vector<int> v(i);
+		iota(begin(v), end(v), 0);
+		shuffle(begin(v), end(v), mt19937(random_device{}()));
 
-	return 0;
+		auto start = chrono::high_resolution_clock::now();
+
+		quickSort(v, 0, i-1);
+
+		auto end = chrono::high_resolution_clock::now();
+		auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+		
+		cout << "duration: " << duration << endl;
+	}
 }

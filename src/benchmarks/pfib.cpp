@@ -11,19 +11,19 @@ unsigned long long Fib(unsigned long long n) {
 
 int main() {
 	// you will need to modify all parameters, etc.
-	unsigned long long n = 9;
+	int n = 40;
 
-	auto start = chrono::high_resolution_clock::now();
+	for (int i = 0; i < n; i++) {
 
-	unsigned long long res = Fib(n);
+		auto start = chrono::high_resolution_clock::now();
 
-	auto end = chrono::high_resolution_clock::now();
-	auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+		Fib(i);
 
-
-	cout << "Fibbonacci of " << n << ": " << res << endl;
-	cout << "time: " << duration << endl;
-
+		auto end = chrono::high_resolution_clock::now();
+		auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+		
+		cout << "size: " << i << " duration: " << duration << endl;
+	}
 }
 
 

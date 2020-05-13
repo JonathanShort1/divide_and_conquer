@@ -47,7 +47,8 @@ class DAC {
 			const combine_f_t& c,
 			const base_f_t& b,
 			const threshold_f_t& t,
-			const ProblemType& p);
+			const ProblemType& p,
+			const int nc);
 
 		// This function returns the result calculated by the compute function.
 		// It must be called after compute(), calling it before results in

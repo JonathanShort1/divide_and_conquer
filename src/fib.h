@@ -33,7 +33,7 @@ auto fibBase = [](const int& p, int& res){
 
 // function that defines the threshold function for fibonacci
 auto fibThreshold = [](const int& t){
-	return t < 30;
+	return t < 10;
 };
 
 #endif

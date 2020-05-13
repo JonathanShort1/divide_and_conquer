@@ -8,38 +8,58 @@
 #define MERGE_H
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
 #include "problem.h"
 
 // function that defines the divide function for merge sort
 auto mergeDivide = [](const problem_t& p, std::vector<problem_t>& subps){
-	auto mid = p.left + (p.right - p.left) / 2;
-	problem_t a = {p.left, mid};
-	problem_t b = {mid, p.right};
+	auto mid = p.left + ((p.right - p.left) / 2);
+	problem_t a = { p.left, mid };
+	problem_t b = { mid, p.right };
 	subps.push_back(a);
 	subps.push_back(b);
 };
 
 // function that defines the combine function for merge sort
 auto mergeCombine = [](const std::vector<result_t>& subps, result_t& res){
-	int size = subps[1].right - subps[0].left;
-	std::vector<int> tmp(size);
-	std::vector<int>::iterator left = subps[0].left;
-	std::vector<int>::iterator mid = subps[0].right;
-	std::vector<int>::iterator right = mid;
-	
-	for (int i = 0; i < size; ++i) {
-		if (left < mid && (right >= subps[1].right || *left <= *right)) {
-			tmp[i] = *left;
-			left++;
+	// size_t size = subps[1].right - subps[0].left;
+	auto lsize = std::distance(subps[0].left, subps[0].right);
+	auto rsize = std::distance(subps[1].left, subps[1].right);
+	std::vector<int> l(lsize);
+	std::vector<int> r(rsize);
+
+	std::copy(begin(l), end(l), subps[0].left);
+	std::copy(begin(r), end(r), subps[1].left);
+
+	std::vector<int>::iterator k = subps[0].left;
+	int i = 0;
+	int j = 0;
+
+	while(i < lsize && j < rsize) {
+		if (l[i] <= r[i]) {
+			*k = l[i];
+			i++;
 		} else {
-			tmp[i] = *right;
-			right++;
+			*k = r[j];
+			j++;
 		}
 	}
 
-	std::copy(begin(tmp), end(tmp), subps[0].left);
+	while (i < lsize) {
+		*k = l[i];
+		i++;
+		k++;
+	}
+
+	while (j < rsize) {
+		*k = r[i];
+		j++;
+		k++;
+	
+	}
+
 	res.left = subps[0].left;
 	res.right = subps[1].right;
 };
@@ -53,7 +73,7 @@ auto mergeBase = [](const problem_t& p, result_t& res){
 
 // function that defines the threshold function for merge sort
 auto mergeThreshold = [](const problem_t& t){
-	return t.right - t.left < 50; //size
+	return std::distance(t.left, t.right) < 2000; //size
 };
 
 #endif

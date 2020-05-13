@@ -7,8 +7,9 @@
 #ifndef QSORT_H
 #define QSORT_H
 
-#include <vector>
 #include <algorithm>
+#include <iostream>
+#include <vector>
 
 #include "problem.h"
 
@@ -17,18 +18,21 @@ auto qsortDivide = [](const problem_t& p, std::vector<problem_t>& subps){
 	auto partition = p.right;
 	auto i = p.left - 1;
 
-	for (auto it = p.left; it != p.right - 1; ++it) {
+	for (auto it = p.left; it != p.right; ++it) {
 		if (*it < *partition) {
 			i++;
 			std::swap(*i, *it);
 		}
 	}
 
-	std::swap(*(i + 1), *p.right);
+	std::swap(*(i + 1), *partition);
 	partition = i + 1;
 
 	problem_t a = {p.left, partition - 1};
 	problem_t b = {partition + 1, p.right};
+
+	if (std::distance(a.left, a.right) < 0) a.left = a.right;
+	if (std::distance(b.left, b.right) < 0) b.left = b.right;
 	subps.push_back(a);
 	subps.push_back(b);
 };
@@ -47,7 +51,7 @@ auto qsortBase = [](const problem_t& p, result_t& res){
 
 // function that defines the threshold function for qsort
 auto qsortThreshold = [](const problem_t& t){
-	return t.right - t.left < 50; //size
+	return std::distance(t.left, t.right) < 2000; //size
 };
 
 #endif

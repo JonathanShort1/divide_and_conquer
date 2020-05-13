@@ -10,13 +10,14 @@ DAC<ProblemType, ResultType>::DAC(const divide_f_t& d,
 								  const combine_f_t& c,
 								  const base_f_t& b,
 								  const threshold_f_t& t,
-								  const ProblemType& p)
+								  const ProblemType& p,
+								  const int nc)
 : divide(d)
 , combine(c)
 , base(b)
 , threshold(t)
 , d_problem(p)
-, d_numCores(std::thread::hardware_concurrency())
+, d_numCores(nc)
 {}
 
 template <typename ProblemType, typename ResultType>
@@ -55,7 +56,7 @@ void DAC<ProblemType, ResultType>::compute()
 }
 
 // Types to allow
-template DAC<int, int>::DAC(const divide_f_t& d, const combine_f_t& c, const base_f_t& b, const threshold_f_t& t, const int& p);
-template DAC<problem_t, result_t>::DAC(const divide_f_t& d, const combine_f_t& c, const base_f_t& b, const threshold_f_t& t, const problem_t& p);
+template DAC<int, int>::DAC(const divide_f_t& d, const combine_f_t& c, const base_f_t& b, const threshold_f_t& t, const int& p, const int nc);
+template DAC<problem_t, result_t>::DAC(const divide_f_t& d, const combine_f_t& c, const base_f_t& b, const threshold_f_t& t, const problem_t& p, const int nc);
 template void DAC<int, int>::compute();
 template void DAC<problem_t, result_t>::compute();

@@ -22,7 +22,7 @@ class Worker {
 		int d_id; // ID of worker (used in work stealing)
 		std::vector<std::shared_ptr<Worker<ProblemType, ResultType>>> d_workers; // worker pool
 		std::queue<std::shared_ptr<Task<ProblemType, ResultType>>> d_q; // work queue
-		std::mutex *d_m; // mutex to ensure thread safety for queue operation
+		std::mutex d_m; // mutex to ensure thread safety for queue operation
 		
 		// TYPE ALIASES
 		typedef std::function<void(const ProblemType& , std::vector<ProblemType>&)> divide_f_t;

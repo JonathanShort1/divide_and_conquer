@@ -14,7 +14,6 @@ Worker<ProblemType, ResultType>::Worker(int id,
 										const threshold_f_t& t)
 : d_isComplete(false)
 , d_id(id)
-, d_m(new std::mutex())
 , divide(d)
 , combine(c)
 , base(b)
@@ -24,14 +23,14 @@ Worker<ProblemType, ResultType>::Worker(int id,
 template <typename ProblemType, typename ResultType>
 void Worker<ProblemType, ResultType>::workQueuePush(
 					  const std::shared_ptr<Task<ProblemType, ResultType>>& t) {
-	std::lock_guard<std::mutex> lock(*d_m);
+	std::lock_guard<std::mutex> lock(d_m);
 	d_q.push(t);
 }
 
 template <typename ProblemType, typename ResultType>
 std::shared_ptr<Task<ProblemType, ResultType>> 
 							   Worker<ProblemType, ResultType>::workQueuePop() {
-	std::lock_guard<std::mutex> lock(*d_m);
+	std::lock_guard<std::mutex> lock(d_m);
 	if (d_q.empty()) {
 		return nullptr;
 	}

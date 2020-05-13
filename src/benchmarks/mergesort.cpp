@@ -85,20 +85,22 @@ void mergeSort(vector<int>& arr, int l, int r)
 /* Driver program to test above functions */
 int main() 
 {
-	int n = 2000000;
-	vector<int> v(n);
-	iota(begin(v), end(v), 0);
-	shuffle(begin(v), end(v), mt19937(random_device{}()));
+	int n = 1000000;
 
-	auto start = chrono::high_resolution_clock::now();
+	for (int i = 10000; i < n; i += 10000) {
+		vector<int> v(i);
+		iota(begin(v), end(v), 0);
+		shuffle(begin(v), end(v), mt19937(random_device{}()));
 
-	mergeSort(v, 0, v.size() - 1);
+		auto start = chrono::high_resolution_clock::now();
 
-	auto end = chrono::high_resolution_clock::now();
-	auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
-	
+		mergeSort(v, 0, i - 1);
 
-	cout << "duration: " << duration << endl;
+		auto end = chrono::high_resolution_clock::now();
+		auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+		
+		cout << "duration: " << duration << endl;
+	}
 
 	return 0;
 }
