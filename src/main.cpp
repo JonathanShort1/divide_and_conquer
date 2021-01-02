@@ -12,7 +12,7 @@
 using namespace std;
 
 int main(){
-	int n = 1000000;
+	int n = 100000;
 	int c = 1; // use std::thread::hardware_concurrency() for max cores
 
 	for (int i = 10000; i <= n; i += 10000) {

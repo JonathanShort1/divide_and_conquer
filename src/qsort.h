@@ -33,8 +33,8 @@ auto qsortDivide = [](const problem_t& p, std::vector<problem_t>& subps){
 
 	if (std::distance(a.left, a.right) < 0) a.left = a.right;
 	if (std::distance(b.left, b.right) < 0) b.left = b.right;
-	subps.push_back(a);
-	subps.push_back(b);
+	subps.emplace_back(a);
+	subps.emplace_back(b);
 };
 
 // function that defines the combine function for qsort

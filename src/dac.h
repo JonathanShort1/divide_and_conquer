@@ -14,52 +14,100 @@
 #ifndef DAC_H
 #define DAC_H
 
-#include <memory>
-#include <vector>
 #include <functional>
+#include <iostream>
+#include <memory>
+#include <thread>
+#include <vector>
 
+#include "problem.h"
 #include "task.h"
 #include "worker.h"
 
-template <typename ProblemType, typename ResultType>
+template <typename Problem, typename Result>
 class DAC {
-	private:
-		// TYPE ALIASES
-		typedef std::function<void(const ProblemType& , std::vector<ProblemType>&)> divide_f_t;
-		typedef std::function<void(const std::vector<ResultType>&, ResultType&)> combine_f_t;
-		typedef std::function<void(const ProblemType&, ResultType&)> base_f_t;
-		typedef std::function<bool(const ProblemType&)> threshold_f_t;
+  private:
+    // TYPE ALIASES
+    typedef std::function<void(const Problem&, std::vector<Problem>&)> divide_f_t;
+    typedef std::function<void(const std::vector<Result>&, Result&)> combine_f_t;
+    typedef std::function<void(const Problem&, Result&)> base_f_t;
+    typedef std::function<bool(const Problem&)> threshold_f_t;
 
-		// DATA MEMBERS
-		divide_f_t divide; // function used to divide a problem into sub problems
-		combine_f_t combine;// function collects the result from sub problems
-		base_f_t base; // function solve a problem sequentially, used once the threshold has been met
-		threshold_f_t threshold; // function determines whether the problem should be divided further or just solved
-		
-		const ProblemType d_problem; // problem to be solved
-		ResultType d_result; // result holder
-		int d_numCores; // number of cores available on architecture
-		std::vector<std::shared_ptr<Worker<ProblemType, ResultType>>> d_workers; // set of workers to use
+    // DATA MEMBERS
+    divide_f_t    divide;
+    combine_f_t   combine;
+    base_f_t      base;
+    threshold_f_t threshold;
 
-	public:
-		// constructor
-		DAC(const divide_f_t& d,
-			const combine_f_t& c,
-			const base_f_t& b,
-			const threshold_f_t& t,
-			const ProblemType& p,
-			const int nc);
+    const Problem   d_problem;  // problem to be solved
+    Result          d_result;   // result holder
+    const int       d_numCores; // number of cores available on architecture
+    std::vector<std::shared_ptr<Worker<Problem, Result>>> d_workers;
 
-		// This function returns the result calculated by the compute function.
-		// It must be called after compute(), calling it before results in
-		// undefined behaviour.
-		const ResultType& getResult() { return d_result; }
+  public:
+    // constructor
+    DAC(const divide_f_t& d, const combine_f_t& c, const base_f_t& b,
+                         const threshold_f_t& t, const Problem& p, const int nc)
+    : divide(d)
+    , combine(c)
+    , base(b)
+    , threshold(t)
+    , d_problem(p)
+    , d_numCores(nc)
+    {}
 
-		// This function starts the computation to solve the problem.  It
-		// initialise the worker pool and creates the root task.  The root task
-		// is pushed to one work queue and all the workers are started.  Once
-		// all the workers have complete the result it posted to 'result'.
-		void compute();
+    // This function returns the result calculated by the compute function.
+    // It must be called after compute(), calling it before results in
+    // undefined behaviour.
+    const Result& getResult() { return d_result; }
+
+    // This function starts the computation to solve the problem.  It
+    // initialise the worker pool and creates the root task.  The root task
+    // is pushed to one work queue and all the workers are started.  Once
+    // all the workers have complete the result it posted to 'result'.
+    void compute()
+    {
+        // Create workers
+        for (int i = 0; i < d_numCores; ++i) {
+            d_workers.emplace_back(
+                std::make_shared<Worker<Problem, Result>>(i,
+                                                          divide,
+                                                          combine,
+                                                          base,
+                                                          threshold));
+        }
+
+        // set vector of workers for each worker
+        for (int i = 0; i < d_numCores; ++i) {
+            d_workers[i]->setWorkerVector(d_workers);
+        }
+
+        // Create root task
+        std::shared_ptr<Task<Problem, Result>> dummyParent(nullptr);
+        auto task = std::make_shared<Task<Problem, Result>>(d_problem,
+                                                            dummyParent,
+                                                            0,
+                                                            true);
+
+        // Push root task to first worker
+        d_workers[0]->workQueuePush(task);
+
+        // Set all worker running
+        std::vector<std::thread> threads;
+        for (int i = 0; i < d_numCores; ++i) {
+            threads.emplace_back(std::thread([this, i] {
+                d_workers[i]->work();
+            }));
+        }
+
+        // wait for all workers to complete
+        for (int i = 0; i < d_numCores; ++i) {
+            threads[i].join();
+        }
+
+        // get result from root task
+        d_result = task->getResult();
+    }
 };
 
 #endif

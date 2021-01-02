@@ -21,41 +21,35 @@
 #include <memory>
 #include <vector>
 
-template <typename ProblemType, typename ResultType>
+template <typename Problem, typename Result>
 class Task {
-	private:
+  public:
+    bool                        d_isComplete; // Has result field been filled
+    bool                        d_isWaiting; // is waiting on its children
+    bool                        d_isRoot; // Is this the root task (Important!)
+    const int                   d_index; // index in parent's results vector
+    const std::shared_ptr<Task> d_parent; // link to parent
+    size_t                      d_numChild; // number of child tasks
+    size_t                      d_childCompleteCount; // num children completed
+    const Problem               d_problem; // problem to solve
+    Result                      d_result; // result to return to parent of DAC
+    std::vector<Result>         d_results; // results vector for children tasks
 
-	public:
-		bool d_isComplete; // Has the result field been filled.
-		bool d_isWaiting; // is this task waiting on its children
-		bool d_isRoot; // Is this task the root task (Important!)
-		const int d_index; // index in parent's results vector
-		const std::shared_ptr<Task> d_parent; // link to parent
-		size_t d_numChild; // number of child tasks (dependencies)
-		size_t d_childCompleteCount; // number of children completed
-		const ProblemType d_problem; // problem to solve
-		ResultType d_result; // result to return to parent of DAC
-		std::vector<ResultType> d_results; // results vector for children to post to
+    Task(const Problem p, const std::shared_ptr<Task> par, const int i,
+                                                                    bool isRoot)
+    : d_isComplete(false)
+    , d_isWaiting(false)
+    , d_isRoot(isRoot)
+    , d_index(i)
+    , d_parent(par)
+    , d_numChild(0)
+    , d_childCompleteCount(0)
+    , d_problem(p)
+    {}
 
-		Task(
-			const ProblemType p,
-			const std::shared_ptr<Task> par,
-			const int i,
-			bool isRoot
-		)
-		: d_isComplete(false)
-		, d_isWaiting(false)
-		, d_isRoot(isRoot)
-		, d_index(i)
-		, d_parent(par)
-		, d_numChild(0)
-		, d_childCompleteCount(0)
-		, d_problem(p)
-		{}
-
-		// This function returns the 'result' calculated by this task for the
-		// 'problem'
-		ResultType& getResult() { return d_result; }
+    // This function returns the 'result' calculated by this task for the
+    // 'problem'
+    Result& getResult() { return d_result; }
 };
 
 #endif

@@ -7,8 +7,8 @@ all: main pfib qsort mergesort
 #						MAIN DRIVER
 ################################################################################
 
-main: main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
-	$(CC) $(FLAGS) -o main main.cpp dac.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
+main: main.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
+	$(CC) $(FLAGS) -o main main.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
 
 pfib: benchmarks/pfib.cpp
 	$(CC) $(FLAGS) -o benchmarks/pfib benchmarks/pfib.cpp

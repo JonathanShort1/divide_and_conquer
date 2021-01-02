@@ -11,8 +11,8 @@
 
 // function that defines the divide function for fibonacci
 auto fibDivide = [](const int& p, std::vector<int>& subps){
-	subps.push_back(p - 1);
-	subps.push_back(p - 2);
+	subps.emplace_back(p - 1);
+	subps.emplace_back(p - 2);
 };
 
 // function that defines the combine function for fibonacci
