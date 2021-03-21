@@ -1,5 +1,5 @@
-CC=g++
-FLAGS= -Wall -Wextra -pthread -g
+CC=clang++
+FLAGS= -Werror -pthread -g -std=c++17 -stdlib=libc++
 
 all: main pfib qsort mergesort
 
@@ -8,7 +8,7 @@ all: main pfib qsort mergesort
 ################################################################################
 
 main: main.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
-	$(CC) $(FLAGS) -o main main.cpp dac.h fib.h merge.h problem.h qsort.h task.h worker.h worker.cpp
+	$(CC) $(FLAGS) main.cpp worker.cpp -o main
 
 pfib: benchmarks/pfib.cpp
 	$(CC) $(FLAGS) -o benchmarks/pfib benchmarks/pfib.cpp
