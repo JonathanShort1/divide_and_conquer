@@ -13,18 +13,23 @@
 
 #include "problem.h"
 
+namespace MergeSort {
+    typedef problem_t problem_t;
+    typedef result_t result_t;
+};
+
 // function that defines the divide function for merge sort
-auto mergeDivide = [](const problem_t& p, std::vector<problem_t>& subps){
-auto mid = p.left + ((p.right - p.left) / 2);
-problem_t a = { p.left, mid };
-problem_t b = { mid, p.right };
+auto mergeDivide = [](const problem_t& p, std::vector<problem_t>& subps) {
+    auto mid = p.left + ((p.right - p.left) / 2);
+    problem_t a = { p.left, mid };
+    problem_t b = { mid, p.right };
     subps.emplace_back(a);
     subps.emplace_back(b);
 };
 
 // function that defines the combine function for merge sort
-auto mergeCombine = [](const std::vector<result_t>& subps, result_t& res){
-// size_t size = subps[1].right - subps[0].left;
+auto mergeCombine = [](const std::vector<result_t>& subps, result_t& res) {
+    // size_t size = subps[1].right - subps[0].left;
     auto lsize = std::distance(subps[0].left, subps[0].right);
     auto rsize = std::distance(subps[1].left, subps[1].right);
     std::vector<int> l(lsize);
@@ -44,34 +49,34 @@ auto mergeCombine = [](const std::vector<result_t>& subps, result_t& res){
         } else {
             *k = r[j];
             j++;
+        }
     }
-}
 
-while (i < lsize) {
-    *k = l[i];
-    i++;
-    k++;
-}
+    while (i < lsize) {
+        *k = l[i];
+        i++;
+        k++;
+    }
 
-while (j < rsize) {
-    *k = r[i];
-    j++;
-    k++;
+    while (j < rsize) {
+        *k = r[i];
+        j++;
+        k++;
 
-}
+    }
 
-res.left = subps[0].left;
-res.right = subps[1].right;
+    res.left = subps[0].left;
+    res.right = subps[1].right;
 };
 
 // function that defines the base function for merge sort
-auto mergeBase = [](const problem_t& p, result_t& res){
+auto mergeBase = [](const problem_t& p, result_t& res) {
     std::sort(p.left, p.right);
     res = p;
 };
 
 // function that defines the threshold function for merge sort
-    auto mergeThreshold = [](const problem_t& t){
+auto mergeThreshold = [](const problem_t& t) {
     return std::distance(t.left, t.right) < 2000; //size
 };
 
